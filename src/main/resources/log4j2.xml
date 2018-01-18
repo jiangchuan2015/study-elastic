@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="ERROR">
+    <Properties>
+        <property name="app-name">study-elastic</property>
+        <property name="log_pattern">%d %p %C{1.} [%t] %m%n</property>
+        <property name="log_file_dir">D:\\app-logs\\${app-name}</property>
+        <property name="every_file_size">10M</property>
+        <property name="keep_file_count">5</property>
+    </Properties>
+
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout>
+                <pattern>%d %p %C [%L] [%t] %m%n</pattern>
+            </PatternLayout>
+        </Console>
+
+        <RollingFile name="app-error" fileName="${log_file_dir}/${app-name}-error.log"
+                     filePattern="${log_file_dir}/%d{yyyy-MM-dd}/${app-name}-error-%i.log.gz">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${log_pattern}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <SizeBasedTriggeringPolicy size="${every_file_size}"/>
+            </Policies>
+            <DefaultRolloverStrategy max="${keep_file_count}"/>
+        </RollingFile>
+
+        <RollingFile name="app-info" fileName="${log_file_dir}/${app-name}-info.log"
+                     filePattern="${log_file_dir}/%d{yyyy-MM-dd}/${app-name}-info-%i.log.gz">
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${log_pattern}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <SizeBasedTriggeringPolicy size="${every_file_size}"/>
+            </Policies>
+            <DefaultRolloverStrategy max="${keep_file_count}"/>
+        </RollingFile>
+
+        <RollingFile name="app-debug" fileName="${log_file_dir}/${app-name}-debug.log"
+                     filePattern="${log_file_dir}/%d{yyyy-MM-dd}/${app-name}-debug-%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="INFO" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="TRACE" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <PatternLayout pattern="${log_pattern}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <SizeBasedTriggeringPolicy size="${every_file_size}"/>
+            </Policies>
+            <DefaultRolloverStrategy max="${keep_file_count}"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <!-- 可输出 API URL Mapping -->
+        <Logger name="org.springframework.web" level="INFO">
+            <appender-ref ref="app-info"/>
+        </Logger>
+
+        <!-- 业务日志 -->
+        <Logger name="chuan.study.elastic" level="INFO">
+            <appender-ref ref="app-error"/>
+            <appender-ref ref="app-info"/>
+            <appender-ref ref="app-debug"/>
+        </Logger>
+
+        <!-- 只在控制台输出 -->
+        <Root level="INFO">
+            <appender-ref ref="console"/>
+        </Root>
+    </Loggers>
+</Configuration>
